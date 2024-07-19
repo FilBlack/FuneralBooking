@@ -10,6 +10,16 @@
 	}
 }
 
+@font-face {
+	font-family: 'Playfair Display';
+	src: url('fonts/playfair/static/PlayfairDisplay-Regular.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'Merriweather';
+	src: url('fonts/merriweather/Merriweather-Regular.ttf')
+}
+
 body {
 	margin: 0;
 	font-family:  'Playfair Display', sans; 
@@ -5270,7 +5280,7 @@ a {
 }
 
 * + p {
-	margin-top: 0.8125rem;
+	margin-top: 0.975rem;
 }
 
 * + h1, * + .h1 {
