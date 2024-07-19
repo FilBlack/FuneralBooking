@@ -5,10 +5,8 @@ const browserSync = require('browser-sync').create();
 const bodyParser = require('body-parser');
 const Stripe = require('stripe');
 const filepath = 'database.json'
-const forceHttps = require('express-force-https');
+// const forceHttps = require('express-force-https');
 
-
-console.log(process.env)
 
 // Ensure the .env file is required at the top if you're using environment variables
 require('dotenv').config();
@@ -67,7 +65,7 @@ function updateData(existingData, incomingData) {
 function expressServer() {
     const app = express();
 
-    app.use(forceHttps);
+    // app.use(forceHttps);
 
     app.use(bodyParser.json());  // Parse JSON request bodies
 
