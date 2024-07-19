@@ -1983,3 +1983,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
   
+
+document.addEventListener("DOMContentLoaded", function() {
+	// Listen for all clicks on the document
+	document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+	  anchor.addEventListener('click', function (e) {
+		e.preventDefault(); // Prevent default anchor click behavior
+  
+		// Find the target element
+		const targetId = this.getAttribute('href');
+		const targetElement = document.querySelector(targetId);
+		console.log(targetElement)
+  
+		// Scroll to the target element
+		if (targetElement) {
+		  targetElement.scrollIntoView({
+			behavior: 'smooth',  // Smooth scroll
+			block: 'start'       // Align to the top of the viewport
+		  });
+		}
+	  });
+	});
+  });

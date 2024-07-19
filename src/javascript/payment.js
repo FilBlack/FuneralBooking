@@ -190,3 +190,4 @@ document.addEventListener('DOMContentLoaded', function() {
         displayArea.textContent = 'No data to display.';
     }
 });
+

@@ -4,11 +4,10 @@ const path = require('path');
 const browserSync = require('browser-sync').create();
 const bodyParser = require('body-parser');
 const Stripe = require('stripe');
-const { v4: uuidv4 } = require('uuid');
 const filepath = 'database.json'
 
 
-
+console.log(process.env)
 
 // Ensure the .env file is required at the top if you're using environment variables
 require('dotenv').config();
@@ -247,18 +246,24 @@ function expressServer() {
     })
 
     // Start the Express server
-    const server = app.listen(3000, function() {
-        console.log('[Express] Server listening on port 3000');
+    const port = process.env.PORT || 8081;
+
+    const server = app.listen(port, function() {
+        console.log(`[Express] Server listening on port ${port}`);
     });
 
     // Initialize BrowserSync to sync with the Express server
-    browserSync.init({
-        open: false,
-        notify: false,
-        proxy: 'localhost:3000',
-        files: ['src/**/*.html', 'src/**/*.css', 'src/**/*.js'],
-        port: 4000,
-    });
+    
+    if (process.env.NODE_ENV !== 'production') {
+        const browserSync = require('browser-sync').create();
+        browserSync.init({
+            open: false,
+            notify: false,
+            proxy: 'localhost:8081',
+            files: ['src/**/*.html', 'src/**/*.css', 'src/**/*.js'],
+            port: 4000,
+        });
+    }
 
     // Clean up on server close
     server.on('close', () => {
