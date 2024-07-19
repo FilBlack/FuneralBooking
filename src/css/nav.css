@@ -1,0 +1,218 @@
+.navbar-nav {
+    flex-grow: 1;  /* Allows the navbar-nav to take up all available space */
+    justify-content: center; /* Centers navbar items */
+  }
+  .navbar-collapse {
+    flex-grow: 1; /* Ensures the navbar collapse grows to fit the space */
+  }
+  .navbar-text {
+    flex-grow: 0; /* Prevents the phone number area from growing */
+    width: 200px;
+  }
+
+.nav-link, .navbar-text {
+    color:white !important;
+    z-index: 1;
+}
+
+.navbar-brand img {
+    height: 50px; /* Adjust this value as needed */
+    width: 200px;
+}
+
+
+.navbar {
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    background-color: #07051d;
+}
+
+.navbar-payment {
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    background-color: #ffffff;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.462);
+    margin-bottom: 30px;
+}
+
+.nav-center {
+    text-align: center;
+}
+
+.nav-link-payment, .navbar-text-payment {
+    color:black !important;
+    z-index: 1;
+    width: 200px;
+}
+
+.intro-image {
+    padding-top: 50px;
+}
+.intro-section{
+    background-color: #14191d;  /* Gray background */
+    min-height: 100% ;           /* 100% of the viewport height */
+    width: 100%;  
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 60px;
+}
+
+
+.intro-section > * {
+    color:white;
+
+}
+
+
+.intro-image-column {
+    margin-left: 0.5px;
+    margin-right: 0.5px;
+}
+
+
+.semi-centered-col {
+    margin-left: auto;
+    margin-right: auto;
+    max-width:  76.66667%; 
+}
+
+.whoweare-section {
+    background-color: white;
+    width: 100%; 
+    margin-bottom: 60px;
+    
+}
+.whoweare-section a, .whoweare-section div {
+    font-size: 20px;
+}
+
+.img-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+}
+
+.our-process > *{
+    text-align: right;
+}
+
+.pricing-section {
+    margin-bottom: 80px;
+}
+
+.fullscreen {
+    min-height: 100vh;
+    width: 100%;
+}
+
+.fullheight {
+    min-height: 100vh;
+}
+
+.anchor {
+    position: relative;
+}
+
+.bottom-left-button {
+    position: absolute;
+    left: 0; /* Aligns the button to the left edge */
+    bottom: 40px; /* Aligns the button to the bottom edge */
+    margin: 0px; /* Adds a little space from the edges */
+}
+
+@media (max-width: 768px) { /* Adjust the max-width as needed for your breakpoint */
+    .bottom-left-button {
+        position: static; /* Makes the button flow naturally in the document, below content */
+        margin-top: 10px; /* Adds space between the text and the button */
+    }
+
+}
+
+.bottom-left-button-white {
+    position: absolute;
+    left: 0; /* Aligns the button to the left edge */
+    bottom: 0px; /* Aligns the button to the bottom edge */
+    margin: 10px;
+}
+
+@media (max-width: 768px) {
+    .bottom-left-button-white {
+        position: static; /* Makes the button flow naturally in the document, below content */
+        margin-top: 10px; /* Adds space between the text and the button */
+    }
+}
+
+.bottom-right-button-white {
+    position: absolute;
+    right: 0; /* Aligns the button to the left edge */
+    bottom: 0px; /* Aligns the button to the bottom edge */
+    margin: 30px;
+}
+
+@media (max-width: 768px) {
+    .bottom-right-button-white {
+        position: static; /* Makes the button flow naturally in the document, below content */
+        margin-top: 10px; /* Adds space between the text and the button */
+    }
+}
+
+.light-section {
+    box-shadow: 0px 0px 60px 45px rgba(255, 255, 255, 0.8) !important
+}
+
+/* box-shadow: rgba(0, 0, 0, 0.07) 0px 1px 2px, rgba(0, 0, 0, 0.07) 0px 2px 4px, rgba(0, 0, 0, 0.07) 0px 4px 8px, rgba(0, 0, 0, 0.07) 0px 8px 16px, rgba(0, 0, 0, 0.07) 0px 16px 32px, rgba(0, 0, 0, 0.07) 0px 32px 64px; */
+
+.parent-border-bottom input, .parent-border-bottom textarea, .parent-border-bottom select {
+        border: none !important;
+        border-bottom: 1px solid #35353582 !important;
+        outline: none !important;
+}
+
+.parent-border-bottom label {
+    font-size: 20px;
+}
+
+.parent-border-bottom .row{
+    padding-top: 30px; /* Same as margin size */
+    padding-bottom: 30px;
+    margin: 30px; /* Margin around the input */
+    /* border-bottom: 1px solid #35353582;  */
+    box-shadow: 0 -20px 60px -58px rgba(80, 2, 249, 0.635), 0 20px 60px -58px rgba(80, 2, 249, 0.635);;
+    background-clip: padding-box; /* Prevents background color from filling the bottom padding */
+    box-sizing: border-box; /* Includes padding and border in the element's total dimensions */
+    /* rgba(0, 0, 0, 0.835) */
+    
+}
+
+
+.parent-border-bottom-payment input, .parent-border-bottom-payment textarea, .parent-border-bottom-payment select {
+    border: 1px solid #e6e6e6;
+    padding: 0.75rem;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.03), 0px 3px 6px rgba(0, 0, 0, 0.02);
+    width: 100%;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.parent-border-bottom-payment .row {
+    margin-bottom: 0.75rem;
+}
+
+.parent-border-bottom-payment label {
+    font-size: 0.93rem;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    display: block;
+}
+
+.nav-item{
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+.navbar-fixed {
+    position: fixed;
+    top: 0;
+    width: 100%; /* Make sure the navbar extends full width */
+    z-index: 1000; /* Ensures the navbar stays on top of other content */
+}

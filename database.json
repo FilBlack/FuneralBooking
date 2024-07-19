@@ -1,0 +1,30 @@
+{
+  "all_homes": [
+    {
+      "name": "flanagans",
+      "coordinates": [
+        53.3541439,
+        -6.3115016
+      ]
+    },
+    {
+      "name": "massey",
+      "coordinates": [
+        53.340382,
+        -6.315197
+      ]
+    }
+  ],
+  "email": [
+    "dfdfd@cooler.sam",
+    "ficakc@seznam.cz"
+  ],
+  "address": [
+    "Fortescue Ln, Rathmines, Dublin, Ireland",
+    "Apartment 2, D.f.'S Place, Main St, Meenvane, Schull, Co. Cork, P81 N525, Ireland",
+    "Jervis St, North City, Dublin, Ireland",
+    "Limerick, Co. Limerick, Ireland"
+  ],
+  "customers": [
+  ]
+}

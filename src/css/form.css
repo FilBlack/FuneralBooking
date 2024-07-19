@@ -1,0 +1,32 @@
+.form-centered-col {
+    margin-left: auto;
+    margin-right: auto;
+    max-width:  66.66667%; 
+  }
+
+  .form-centered-col.payment {
+    margin-left: auto;
+    margin-right: auto;
+    max-width:  76.66667%; 
+  }
+
+  
+/* Base classes */
+.burial, .cremation, .hidden {
+  opacity: 0;
+  transform: translateY(-20px); /* Slide effect */
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+  transition: all 0.5s ease;
+}
+
+.burial-visible, .cremation-visible, .visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  height: auto;
+  overflow: visible;
+  transition: opacity 0.5s ease, transform 0.5s ease;;
+}
