@@ -5,6 +5,7 @@ const browserSync = require('browser-sync').create();
 const bodyParser = require('body-parser');
 const Stripe = require('stripe');
 const filepath = 'database.json'
+const forceHttps = require('express-force-https');
 
 
 console.log(process.env)
@@ -65,6 +66,8 @@ function updateData(existingData, incomingData) {
 
 function expressServer() {
     const app = express();
+
+    app.use(forceHttps);
 
     app.use(bodyParser.json());  // Parse JSON request bodies
 
