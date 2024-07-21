@@ -159,35 +159,48 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
   
+// document.addEventListener('DOMContentLoaded', function() {
+//     console.log(sessionStorage);
+//     const formData = JSON.parse(sessionStorage.getItem('formData')); // Retrieve and parse the data
+//     const displayArea = document.getElementById('formDataDisplay');
+
+//     if (formData) {
+//         // Loop through the stored data and create elements to display it using Bootstrap classes
+//         Object.keys(formData).forEach(key => {
+//             // Create a new div for each row
+//             const rowDiv = document.createElement('div');
+//             rowDiv.className = 'row';
+
+//             // Create a column div
+//             const colDiv = document.createElement('div');
+//             colDiv.className = 'mb-1 col-7 form-centered-col';
+
+//             // Create a paragraph to hold each key-value pair
+//             const p = document.createElement('p');
+//             p.textContent = `${key}: ${formData[key]}`;
+
+//             // Append the paragraph to the column div, and the column div to the row div
+//             colDiv.appendChild(p);
+//             rowDiv.appendChild(colDiv);
+
+//             // Append the row div to the display area
+//             displayArea.appendChild(rowDiv);
+//         });
+//     } else {
+//         displayArea.textContent = 'No data to display.';
+//     }
+// });
 document.addEventListener('DOMContentLoaded', function() {
-    console.log(sessionStorage);
-    const formData = JSON.parse(sessionStorage.getItem('formData')); // Retrieve and parse the data
     const displayArea = document.getElementById('formDataDisplay');
-
-    if (formData) {
-        // Loop through the stored data and create elements to display it using Bootstrap classes
-        Object.keys(formData).forEach(key => {
-            // Create a new div for each row
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'row';
-
-            // Create a column div
-            const colDiv = document.createElement('div');
-            colDiv.className = 'mb-1 col-7 form-centered-col';
-
-            // Create a paragraph to hold each key-value pair
-            const p = document.createElement('p');
-            p.textContent = `${key}: ${formData[key]}`;
-
-            // Append the paragraph to the column div, and the column div to the row div
-            colDiv.appendChild(p);
-            rowDiv.appendChild(colDiv);
-
-            // Append the row div to the display area
-            displayArea.appendChild(rowDiv);
-        });
+    const storedFormHTML = sessionStorage.getItem('formHTML');
+    
+    if (storedFormHTML) {
+        displayArea.innerHTML = storedFormHTML;  // Display the form
+        
+        // Disable all form elements
+        const form = displayArea.querySelector('form');
+        Array.from(form.elements).forEach(element => element.disabled = true);
     } else {
-        displayArea.textContent = 'No data to display.';
+        displayArea.textContent = 'No form data to display.';
     }
 });
-

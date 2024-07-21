@@ -1952,36 +1952,62 @@ document.addEventListener('DOMContentLoaded', function() {
     
 });
 
+// document.addEventListener('DOMContentLoaded', function() {
+// 	const form = document.getElementById('funeral_form');
+// 	console.log("got here")
+// 	console.log(form)
+// 	const storedData = sessionStorage.getItem('formData');
+// 	if (storedData) {
+// 		const formData = JSON.parse(storedData);
+// 		for (const key in formData) {
+// 			if (formData.hasOwnProperty(key)) {
+// 				const input = form.elements[key];
+// 				if (input) {
+// 					input.value = formData[key];
+// 				}
+// 			}
+// 		}
+// 	}
+//     form.addEventListener('submit', function(e) {
+//         e.preventDefault();  // Prevent the default form submission
+// 		console.log("trying to prevent")
+//         const formData = new FormData(form);
+//         const entries = {};
+//         for (const [key, value] of formData.entries()) {
+//             entries[key] = value;
+//         }
+
+//         // Save the form data in sessionStorage or pass it to the review page
+//         sessionStorage.setItem('formData', JSON.stringify(entries));
+//         window.location.href = 'payment.html';  // Redirect to review page
+//     });
+// });
+
 document.addEventListener('DOMContentLoaded', function() {
-	const form = document.getElementById('funeral_form');
-	console.log("got here")
-	console.log(form)
-	const storedData = sessionStorage.getItem('formData');
-	if (storedData) {
-		const formData = JSON.parse(storedData);
-		for (const key in formData) {
-			if (formData.hasOwnProperty(key)) {
-				const input = form.elements[key];
-				if (input) {
-					input.value = formData[key];
-				}
-			}
-		}
-	}
+    const form = document.getElementById('funeral_form');
+    
     form.addEventListener('submit', function(e) {
         e.preventDefault();  // Prevent the default form submission
-		console.log("trying to prevent")
-        const formData = new FormData(form);
-        const entries = {};
-        for (const [key, value] of formData.entries()) {
-            entries[key] = value;
-        }
+        console.log("Form submission prevented");
+        
+        // Clone the form to manipulate it without affecting the original on the page
+        const formClone = form.cloneNode(true);
+        
+        // Remove all buttons from the clone
+        const buttons = formClone.querySelectorAll('button, input[type="button"], input[type="submit"], input[type="reset"]');
+        buttons.forEach(button => button.remove());
 
-        // Save the form data in sessionStorage or pass it to the review page
-        sessionStorage.setItem('formData', JSON.stringify(entries));
-        window.location.href = 'payment.html';  // Redirect to review page
+        // Serialize the modified form HTML and store it
+        const formHTML = formClone.outerHTML;
+        sessionStorage.setItem('formHTML', formHTML);
+
+        window.location.href = 'payment.html';  // Redirect to the next page where the form will be displayed and disabled
     });
 });
+
+
+
+
   
 
 document.addEventListener("DOMContentLoaded", function() {
