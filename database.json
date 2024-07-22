@@ -26,5 +26,7 @@
     "Limerick, Co. Limerick, Ireland",
     "Junction House, Airton Rd, Tallaght, Dublin, D24 CF75, Ireland"
   ],
-  "customers": []
+  "customers": [],
+  "credentials": [{"name":"flanagans", "password": "flanney"}]
+
 }

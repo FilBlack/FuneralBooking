@@ -2031,3 +2031,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	  });
 	});
   });
+
+
+// Funeral home interface 
+

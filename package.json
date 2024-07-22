@@ -21,6 +21,7 @@
     "jsonfile": "^6.1.0",
     "mailgen": "^2.0.28",
     "nodemailer": "^6.9.14",
+    "sqlite3": "^5.1.7",
     "stripe": "^16.2.0"
   },
   "devDependencies": {

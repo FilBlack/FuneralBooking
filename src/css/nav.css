@@ -156,7 +156,6 @@
 
 
 
-
 .bottom-left-button {
     position: absolute;
     left: 0; /* Aligns the button to the left edge */
@@ -299,4 +298,26 @@ h1 {
 .half-img-cover {
     height: 50vh;
     object-fit: cover; 
+}
+
+.carousel-img {
+    height: 80vh;
+    width: auto;
+}
+
+.minfullheight {
+    min-height: 100vh;
+}
+
+.carousel-control-prev, .carousel-control-next {
+    color: #000000; /* Set the text and icon color to white */
+    width: 50px; /* Reduce the width of the button */
+    height: 50px; /* Reduce the height of the button */
+    border-radius: 50%; /* Optional: makes the buttons circular */
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+#our-partners {
+    background-color: #f7ffcd;
 }

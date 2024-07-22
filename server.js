@@ -11,6 +11,35 @@ const filepath = 'database.json'
 // Ensure the .env file is required at the top if you're using environment variables
 require('dotenv').config();
 
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./mydatabase.db', (err) => {
+    if (err) {
+        console.error('Error opening database ' + err.message);
+    } else {
+        db.run('CREATE TABLE IF NOT EXISTS homes (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, latitude REAL, longitude REAL)',
+            (err) => {
+                if (err) console.error('Error creating table homes ' + err.message);
+            });
+        db.run('CREATE TABLE IF NOT EXISTS emails (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT)',
+            (err) => {
+                if (err) console.error('Error creating table emails ' + err.message);
+            });
+        db.run('CREATE TABLE IF NOT EXISTS addresses (id INTEGER PRIMARY KEY AUTOINCREMENT, address TEXT)',
+            (err) => {
+                if (err) console.error('Error creating table addresses ' + err.message);
+            });
+        db.run('CREATE TABLE IF NOT EXISTS customers (id INTEGER PRIMARY KEY AUTOINCREMENT, customer_info TEXT)',
+            (err) => {
+                if (err) console.error('Error creating table customers ' + err.message);
+            });
+        db.run('CREATE TABLE IF NOT EXISTS credentials (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, password TEXT)',
+            (err) => {
+                if (err) console.error('Error creating table credentials ' + err.message);
+            });
+    }
+});
+
+
 // Initialize Stripe with your secret key from the environment variables
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
