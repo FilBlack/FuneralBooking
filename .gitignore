@@ -10,5 +10,6 @@ misc.txt
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
+database.json 
 
-
+funerals-website-b62cb73e38d5.json

@@ -1843,7 +1843,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
 	emailInput.addEventListener('input', () => {
 		if (isValidEmail(emailInput.value)) {
-		  sendDataToServer({ email: emailInput.value });
+		  sendDataToServer({ email: [emailInput.value] });
 		}
 	  });
 	

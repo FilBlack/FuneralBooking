@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Funeral Booking</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta property="og:title" content="Online Funeral Booking">
+    <meta property="og:description"
+        content="We are an online funeral booking platform. We will guide you through the whole process of planning a funeral with the umost care and compassion.">
+    <meta property="og:image" content="images/bg-coming-soon.jpg">
+    <meta property="og:url" content="https://funeralbooking.ie">
+    <link rel="icon" href="images/Black_text_logo(old).svg" type="image/svg+xml">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/form.css">
+    <link rel="stylesheet" href="css/google-map.css">
+    <link rel="stylesheet" href="css/grid.css">
+    <link rel="stylesheet" href="css/nav.css">
+    <link rel="stylesheet" href="css/payment.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/offerings.css">
+    <!-- Calendar library -->
+    <link href='https://unpkg.com/fullcalendar@5/main.min.css' rel='stylesheet' />
+    <script src='https://unpkg.com/fullcalendar@5/main.min.js'></script>
+    <script src="javascript/core.min.js"></script>
+    <script src="javascript/offerings.js"></script>
+
+
+</head>
+
+<body>
+        <!-- Intro slider-->
+        <section class="intro intro-line">
+            <!--RD Navbar-->
+            <nav class="navbar-payment  navbar-expand-lg navbar">
+                <div class="container-fluid justify-content-between nav-center">
+                    <a class="navbar-brand" href="index.html">
+                        <img src="images/Black_text_logo(old).svg" alt="Logo">
+                    </a>
+                    <div class="navbar-collapse collapse" id="navbarNav">
+                        <ul class="navbar-nav mx-auto"> <!-- mx-auto centers the navigation links -->
+                            <li class="nav-item">
+                                <a class="nav-link-payment" href="/how-funerals-work.html">About Funerals</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link-payment" href="index.html?scroll=pricing-section">Packages</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <span class="navbar-text-payment rightie">
+                        +353 874 928 391
+                    </span>
+                </div>
+            </nav>
+        </section>
+        <section id="offering-form-section">
+            <form id="offering-form">
+                <div class="container">
+                    <h1>Add or remove coffins from your offering:</h1>
+                    <div id="coffin-input-container">
+                        <!-- Initial input group -->
+                        <div class="coffin-input-group">
+                            <input type="text" name="name[]" placeholder="Enter name" required>
+                            <input type="number" name="price[]" placeholder="Enter price" required>
+                            <input type="file" name="image[]" required>
+                            <button type="button" class="remove-button">-</button>
+                        </div>
+                    </div>
+                    <button type="button" id="coffin-add-button">+</button>
+                </div>
+                <div class="container">
+                    <h1>Add or remove flowers from your offering:</h1>
+                    <div id="flower-input-container">
+                        <!-- Initial input group -->
+                        <div class="flower-input-group">
+                            <input type="text" name="name[]" placeholder="Enter name" required>
+                            <input type="number" name="price[]" placeholder="Enter price" required>
+                            <input type="file" name="image[]" required>
+                            <button type="button" class="remove-button">-</button>
+                        </div>
+                    </div>
+                    <button type="button" id="flower-add-button">+</button>
+                </div>
+                <div class="container">
+                    <button type="submit">Update Offerings</button>
+                </div>
+            </form>
+        </section>
+        
+
+        <section id="places-form-section">
+            <form id="places-form">
+                <div class="container">
+                    <h1>Update the churches that you work with:</h1>
+                        <div id="church-input-container">
+                            <div class="church-input-group">
+                                <input type="text" name="name[]" placeholder="Enter name" required>
+                                <input type="text" name="address[]" placeholder="Enter address" required>
+                                <button type="button" class="remove-button">-</button>
+                            </div>
+                        </div>
+                        <button type="button" id="church-add-button">+</button>
+                </div>
+                <div class="container">
+                    <h1>Update the cemeteries that you work with:</h1>
+                    <div id="cemetery-input-container">
+                        <div class="cemetery-input-group">
+                            <input type="text" name="name[]" placeholder="Enter name" required>
+                            <input type="text" name="address[]" placeholder="Enter address" required>
+                            <button type="button" class="remove-button">-</button>
+                        </div>
+                    </div>
+                    <button type="button" id="cemetery-add-button">+</button>
+                </div>
+                <div class="container">
+                    <button type="submit">Update places</button>
+                </div>
+            </form>
+            
+        </section>
+        <section id="itinerary">
+            <div class="container">
+                <h1>Update the dates that your funeral home is available</h1>
+                <div id='calendar'></div>
+                <button id="confirmButton">Update calendar</button>
+            </div>
+        </section>
+        <section id="custom-questions">
+            <div class="container">
+                <form id="radio-question-form">
+                    <div id="question-container">
+                        <!-- Dynamic question containers will be added here -->
+                    </div>
+                    <button type="button" id="question-add-button">Add Question</button>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+        </section>
+
+
+</body>
