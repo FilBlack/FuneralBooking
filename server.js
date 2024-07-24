@@ -7,7 +7,10 @@ const fs = require('fs'); // Ensure fs is required
 const Stripe = require('stripe');
 const bcrypt = require('bcryptjs');
 const cookieParser = require('cookie-parser');
+const express = require('express');
 const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const Redis = require('redis');
 const crypto = require('crypto');
 const { Storage } = require('@google-cloud/storage');
 const filepath = 'database.json'
@@ -20,6 +23,17 @@ require('dotenv').config();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Ensure the .env file is required at the top if you're using environment variables
+
+
+// Create a Redis client
+const redisClient = Redis.createClient({
+    host: 'localhost',
+    port: 6379,
+    password: process.env.MASTER_PASSWORD, // Replace with your Redis instance password
+    legacyMode: true // This may be required depending on the Redis client version
+});
+
+redisClient.connect().catch(console.error);
 
 
 const storage = new Storage();
@@ -250,9 +264,15 @@ function expressServer() {
     app.use(bodyParser.json());  // Parse JSON request bodies
     app.use(cookieParser());
     app.use(session({
-        secret: 'your_secret_key', // Change this to a real secret in production
+        store: new RedisStore({ client: redisClient }),
+        secret: process.env.SECRET_PHRASE, // This should be a random unique string
         resave: false,
-        saveUninitialized: true
+        saveUninitialized: false,
+        cookie: {
+            secure: true, // Set to true if using https
+            httpOnly: true,
+            maxAge: 1000 * 60 * 10 // Session max age in milliseconds
+        }
     }));
 
     // Explicitly handle the root route first
