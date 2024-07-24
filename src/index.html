@@ -20,6 +20,13 @@
   <link rel="stylesheet" href="css/nav.css">
   <link rel="stylesheet" href="css/payment.css">
   <link rel="stylesheet" href="css/footer.css">
+  <link href='https://unpkg.com/fullcalendar@5/main.min.css' rel='stylesheet' />
+  <script src='https://unpkg.com/fullcalendar@5/main.min.js'></script>
+
+  <!-- Plugins for interaction and day/time grids -->
+  <script src='https://unpkg.com/fullcalendar@5/interaction/main.min.js'></script>
+  <script src='https://unpkg.com/fullcalendar@5/daygrid/main.min.js'></script>
+  <script src='https://unpkg.com/fullcalendar@5/timegrid/main.min.js'></script>
   <script src="javascript/core.min.js"></script>
   <script src="javascript/script.js"></script>
 
@@ -106,7 +113,8 @@
             </div>
             <div class="col-lg-7">
               <!-- video  -->
-              <img src="images/bg-coming-soon.jpg" alt="Image1" class="">
+              <iframe width="650" height="400" src="https://www.youtube-nocookie.com/embed/LgBtUfP_AUY?si=K09ZYUri5L3lkYWb&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              <!-- <img src="images/bg-coming-soon.jpg" alt="Image1" class=""> -->
             </div>
           </div>
         </div>
@@ -155,9 +163,9 @@
 
     </section>
     <section id="our-partners" class="minfullheight">
-      <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+      <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
         <div class="carousel-inner">
-          <div class="carousel-item active">
+          <div class="carousel-item " data-provider-id="2">
             <div class="container">
               <div class="row">
                 <div class="col-5">
@@ -174,7 +182,7 @@
             </div>
 
           </div>
-          <div class="carousel-item">
+          <div class="carousel-item active" data-provider-id="1">
             <div class="container">
               <div class="row">
                 <div class="col-5">
@@ -190,7 +198,7 @@
             </div>
 
           </div>
-          <div class="carousel-item">
+          <div class="carousel-item" data-provider-id="3">
             <div class="container">
               <div class="row">
                 <div class="col-5">
@@ -244,7 +252,7 @@
                   <li class="pricing-list-item pricing-list-item-disabled">Service Vehicle</li>
                 </ul> -->
                 <p class="text-center">A cost-effective cremation option with essential services, including a basic coffin and crematorium service.</p>
-                <a class="btn btn-outline" onclick="scrollToSection('email_and_address')"
+                <a class="btn btn-outline pricing-btn" onclick="scrollToSection('email_and_address')"
                   id="package1_button">View Now</a>
               </div>
             </div>
@@ -265,7 +273,7 @@
                   <li class="pricing-list-item pricing-list-item-disabled">Service Vehicle</li>
                 </ul> -->
                 <p class="text-center">A comprehensive burial package featuring a Catholic service, standard coffin, cemetery plot, and additional amenities like limousine service and music.</p>
-                <a class="btn btn-outline" onclick="scrollToSection('email_and_address')"
+                <a class="btn btn-outline pricing-btn" onclick="scrollToSection('email_and_address')"
                   id="package2_button">View Now</a>
               </div>
             </div>
@@ -286,7 +294,7 @@
                   <li class="pricing-list-item">Service Vehicle</li>
                 </ul> -->
                 <p class="text-center">An environmentally conscious cremation package with an eco-friendly coffin and crematorium service.                </p>
-                <a class="btn btn-outline" onclick="scrollToSection('email_and_address')"
+                <a class="btn btn-outline pricing-btn" onclick="scrollToSection('email_and_address')"
                   id="package3_button">View Now</a>
               </div>
             </div>
@@ -307,7 +315,7 @@
                   <li class="pricing-list-item pricing-list-item-disabled">Service Vehicle</li>
                 </ul> -->
                 <p class="text-center">A premium burial package offering a full Catholic service with a high-quality coffin, limousine service, comprehensive announcements, and a wake at the funeral home.</p>
-                <a class="btn btn-outline" onclick="scrollToSection('email_and_address')"
+                <a class="btn btn-outline pricing-btn" onclick="scrollToSection('email_and_address')"
                   id="package_eco_button">View Now</a>
               </div>
             </div>
@@ -324,11 +332,11 @@
       </button> -->
 
     <!-- email and address  -->
-    <form class="section-md parent-border-bottom" id="email_and_address">
+    <form class="section-md parent-border-bottom" id="funeral_form" name="funeral_form">
       <div class="row">
         <div class="mb-1 col-8 form-centered-col">
           <label for="email_input" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="email_input" placeholder="name@example.com">
+          <input type="email" class="form-control" id="email_input" name="email_input" placeholder="name@example.com">
         </div>
       </div>
       <input type="hidden" name="selectedOption" id="selectedOption">
@@ -339,21 +347,69 @@
             onFocus="geolocate()">
         </div>
       </div>
-    </form>
 
     <!-- Funeral home selection  -->
-    <form class="section-md parent-border-bottom" id="funeral_form" name="funeral_form">
+    
       <div class="row">
         <div class=" col-8 form-centered-col">
           <label for="home_options" class="form-label ">Funeral Homes Nearby:</label>
           <select class="form-select" id="home_options">
             <option data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true"
-              title="<img src='path/to/image.jpg' alt='Tooltip Image'>" selected>Basic coffin</option>
-            <option value="1">Standard coffin</option>
-            <option value="2">Premium coffin</option>
+              title="<img src='path/to/image.jpg' alt='Tooltip Image'>" selected>Fanagans</option>
+            <option value="1">Staffords</option>
+            <option value="2">Jennings</option>
           </select>
         </div>
       </div>
+      <div id="editable-section">
+
+        <!-- coffin  --> 
+        
+        <div class="row">
+          <div class="col-8 form-centered-col size-20">Select a coffin from the funeral home:</div>
+          <div id="coffin-selection-container" class="items-cards">
+            
+
+          </div>
+        </div>
+
+
+        <!-- flowers  -->
+        <div class="row">
+          <div class="col-8 form-centered-col size-20">Select a flower from the funeral home:</div>
+          <div id="flower-selection-container"  class="items-cards">
+
+            
+          </div>
+        </div>
+
+        <!-- church -->
+        <div class="row">
+          <div class="col-8 form-centered-col size-20">Select the church:</div>
+          <div id="church-selection-container" class="col-8 form-centered-col">
+
+            
+          </div>
+        </div>
+
+
+        <!-- cemtery -->
+        <div class="row">
+          <div class="col-8 form-centered-col size-20">Select the cemetery:</div>
+          <div id="cemetery-selection-container" class="col-8 form-centered-col">
+
+            
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-8 form-centered-col size-20">Choose your preffered dates:</div>
+          <div id='calendar'></div>
+
+        </div>
+
+      </div>
+
 
       <!-- Burial or cremation  -->
       <div class="row">
@@ -376,14 +432,6 @@
             <input type="radio" id="humanist" name="religion" value="humanist">
             <label for="no">Humanist</label><br>
           </div>
-        </div>
-      </div>
-
-      <!-- Funeral Date -->
-      <div class="row">
-        <div class=" col-8 form-centered-col">
-          <label for="funeral_date">Date of the funeral</label>
-          <input type="date" class="form-control" id="funeral_date">
         </div>
       </div>
 
@@ -707,6 +755,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('scroll')) {
           const target = document.getElementById(urlParams.get('scroll'));
+          console.log(target)
           if (target) {
             target.scrollIntoView({ behavior: 'smooth' });
           }
@@ -714,12 +763,13 @@
       }
 
       // Execute the scroll function when the page loads
-      window.onload = scrollToSectionAfter;
+      window.addEventListener('load', scrollToSectionAfter);
       <!-- google maps -->
     </script>
     <script src="javascript/google-map.js"></script>
     <script async
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMdre5dGiWvrrJHPaE0FAPpXX6-boT5uA&libraries=places&callback=initMap"></script>
+
 </body>
 
 </html>

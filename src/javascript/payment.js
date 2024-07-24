@@ -196,11 +196,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (storedFormHTML) {
         displayArea.innerHTML = storedFormHTML;  // Display the form
-        
-        // Disable all form elements
-        const form = displayArea.querySelector('form');
-        Array.from(form.elements).forEach(element => element.disabled = true);
+
+        // Find all input, select, textarea, and button elements and disable them
+        const inputs = displayArea.querySelectorAll('input, select, textarea, button');
+        inputs.forEach(element => {
+			console.log(element)
+            element.disabled = true;  // Disable each element to prevent user interaction
+        });
     } else {
-        displayArea.textContent = 'No form data to display.';
+        displayArea.textContent = 'No form data to display.';  // Message when no form data is found
     }
 });

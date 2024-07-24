@@ -7,10 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
+        const providerId = document.getElementById('providerId').value;
+        const masterPassword = document.getElementById('masterPassword').value;
 
         const data = {
             username: username,
-            password: password
+            password: password,
+            providerId: providerId,
+            masterPassword: masterPassword
         };
 
         fetch('/register-home', {

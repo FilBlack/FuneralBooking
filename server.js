@@ -3,6 +3,7 @@ const jsonfile = require('jsonfile');
 const path = require('path');
 const browserSync = require('browser-sync').create();
 const bodyParser = require('body-parser');
+const fs = require('fs'); // Ensure fs is required
 const Stripe = require('stripe');
 const bcrypt = require('bcryptjs');
 const cookieParser = require('cookie-parser');
@@ -12,13 +13,14 @@ const { Storage } = require('@google-cloud/storage');
 const filepath = 'database.json'
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
+const nodemailer = require('nodemailer');
 // const forceHttps = require('express-force-https');
-
+require('dotenv').config();
 // Initialize Stripe with your secret key from the environment variables
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Ensure the .env file is required at the top if you're using environment variables
-require('dotenv').config();
+
 
 const storage = new Storage();
 const bucketName = 'funeral_booking';
@@ -44,7 +46,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
         db.run('CREATE TABLE IF NOT EXISTS church (id INTEGER PRIMARY KEY AUTOINCREMENT, provider_id INTEGER, name TEXT, description TEXT, address TEXT, FOREIGN KEY (provider_id) REFERENCES providers(id))', checkTableCreation);
         db.run('CREATE TABLE IF NOT EXISTS cemetery (id INTEGER PRIMARY KEY AUTOINCREMENT, provider_id INTEGER, name TEXT, description TEXT, address TEXT, FOREIGN KEY (provider_id) REFERENCES providers(id))', checkTableCreation);
         // Calendar
-        db.run('CREATE TABLE IF NOT EXISTS Events (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, start TEXT, end TEXT, allDay BOOLEAN)', checkTableCreation);
+        db.run('CREATE TABLE IF NOT EXISTS Events (id INTEGER PRIMARY KEY AUTOINCREMENT, provider_id INTEGER, title TEXT, start TEXT, end TEXT, allDay BOOLEAN)', checkTableCreation);
     }
 });                         
 
@@ -56,51 +58,65 @@ function checkTableCreation(err) {
     }
 }
 
-function saveCredentials(username, password, db, callback) {
-    const saltRounds = 10; // or more, depending on security requirement
+function saveCredentials(username, password, providerId, db, callback) {
+    const saltRounds = 10; // Or more, depending on security requirement
+
+    // Hash the password
     bcrypt.hash(password, saltRounds, (err, hash) => {
         if (err) {
             console.error('Error hashing password: ' + err.message);
             return callback(err);
         }
 
-        // Insert into credentials table
+        // Insert hashed password and username into the credentials table
         db.run('INSERT INTO credentials (name, password) VALUES (?, ?)', [username, hash], function(err) {
             if (err) {
                 console.error('Error inserting new credential: ' + err.message);
                 return callback(err);
             }
 
-            // Now create a provider entry
-            db.run('INSERT INTO providers (name) VALUES (?)', [username], function(err) {
+            // Insert provider information into the providers table
+            db.run('INSERT INTO providers (id, name) VALUES (?, ?)', [providerId, username], function(err) {
                 if (err) {
                     console.error('Error creating provider: ' + err.message);
                     return callback(err);
                 }
-                const providerId = this.lastID;
 
-                // Initialize related offerings
-                initializeOfferings(providerId, db, callback);
-            });
-        });
-    });
-}
-
-function initializeOfferings(providerId, db, callback) {
-    // Insert default or empty entries for coffins, flowers, and dates
-    db.run('INSERT INTO coffins (provider_id, description) VALUES (?, ?)', [providerId, 'Default coffin'], err => {
-        if (err) return callback(err);
-        db.run('INSERT INTO flowers (provider_id, description) VALUES (?, ?)', [providerId, 'Default flower'], err => {
-            if (err) return callback(err);
-            db.run('INSERT INTO dates (provider_id, available_date) VALUES (?, ?)', [providerId, '2024-01-01'], err => {
-                if (err) return callback(err);
-                callback(null, { message: 'Provider and offerings initialized successfully' });
+                // Success, call the callback without an error
+                callback(null);
             });
         });
     });
 }
 
 
+async function sendEmail(to, subject, text) {
+    // Create a transporter
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'Funeralbookingie@gmail.com',  // Your Gmail address
+            pass: process.env.GOOGLE_MAIL_PASSWORD         // Your Gmail password
+        }
+    });
+
+    // Setup email data
+    let mailOptions = {
+        from: '"Filip Black" <Funeralbookingie@gmail.com>',  // sender address
+        to: to,  // list of receivers
+        subject: subject,  // Subject line
+        text: text,  // plain text body
+        html: '<b>Hello world?</b>'  // HTML body content
+    };
+
+    // Send email
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            return console.log(error);
+        }
+        console.log('Message sent: %s', info.messageId);
+    });
+}
 
 function distance(coords1, coords2) {
     function toRad(x) {
@@ -152,7 +168,7 @@ function updateData(existingData, incomingData) {
 //Encryption
 
 const algorithm = 'aes-256-ctr';
-const phrase = 'YOUR_SECRET_KEY'; // Keep this key secure
+const phrase = process.env.SECRET_PHRASE; // Keep this key secure
 
 function generateKey(passphrase) {
     return crypto.createHash('sha256').update(passphrase).digest();
@@ -180,6 +196,50 @@ function decrypt(hash) {
     return decrypted.toString();
 }
 
+function getProviderId(providerId, callback) {
+    if (!isNaN(providerId)) {
+        // providerId is a number, return it as is
+        callback(null, providerId);
+    } else {
+        // providerId is not a number, decrypt it
+        try {
+            const decryptedName = decrypt(providerId);
+            // Fetch provider ID by the decrypted name
+            const sql = 'SELECT id FROM providers WHERE name = ?';
+            db.get(sql, [decryptedName], (err, row) => {
+                if (err) {
+                    callback(err);
+                } else if (row) {
+                    callback(null, row.id);
+                } else {
+                    callback(new Error('Provider not found'));
+                }
+            });
+        } catch (error) {
+            callback(error);
+        }
+    }
+}
+
+async function uploadToCloudStorage(file, category) {
+    const blob = bucket.file(`${category}/${Date.now()}_${file.originalname}`);
+    const blobStream = blob.createWriteStream({
+        resumable: false,
+        metadata: { contentType: file.mimetype }
+    });
+
+    return new Promise((resolve, reject) => {
+        blobStream.on('error', err => {
+            console.error(err);
+            reject(err);
+        });
+        blobStream.on('finish', () => {
+            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+            resolve(publicUrl);
+        });
+        blobStream.end(file.buffer);
+    });
+}
 
 
 function expressServer() {
@@ -286,8 +346,24 @@ function expressServer() {
     
                 if (result) {
                     const encryptedUsername = encrypt(username);
-                    res.cookie('user', encryptedUsername, { httpOnly: true, maxAge: 900000, secure: true }); // Adjust settings as per your security needs
-                    res.redirect('/offerings.html');
+    
+                    // Fetch providerId
+                    const providerQuery = 'SELECT id FROM providers WHERE name = ?';
+                    db.get(providerQuery, [username], (err, provider) => {
+                        if (err) {
+                            console.error('Database error: ' + err.message);
+                            return res.status(500).send('Internal server error');
+                        }
+    
+                        if (!provider) {
+                            return res.status(401).send('Provider not found');
+                        }
+    
+                        const providerId = provider.id;
+                        res.cookie('user', encryptedUsername, { httpOnly: true, maxAge: 900000, secure: true }); // Adjust settings as per your security needs
+                        res.cookie('providerId', providerId, { httpOnly: false, maxAge: 900000 }); // Non-httpOnly cookie for providerId
+                        res.redirect('/offerings.html');
+                    });
                 } else {
                     res.status(401).send('Credentials are not valid');
                 }
@@ -296,86 +372,296 @@ function expressServer() {
     });
     
 
+    app.post('/send-confirmation-email', (req, res) => {
+        const { email } = req.body; // Extract the email address from request body
+    
+        // Ensure there is an email provided
+        if (!email) {
+            return res.status(400).send('Email address is required.');
+        }
+        
+        let transporter = nodemailer.createTransport({
+            host: 'smtp.seznam.cz',
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+                user: 'funeralbookingie@seznam.cz', // your Seznam email
+                pass: process.env.SEZNAM_MAIL_PASSWORD // your Seznam password
+            },
+            tls: {
+                ciphers:'SSLv3'
+            }
+        });
+    
+        // Setup email data
+        let mailOptions = {
+            from: '"Filip Black" <funeralbookingie@seznam.cz>',  // sender address
+            to: email,  // list of receivers
+            subject: "Funeral Booking confirmation",  // Subject line
+            text: 'This is your confirmation email! The Funeral Home will reach out to you shortly.', // Plain text body
+            html: '<b>This is your confirmation email! The Funeral Home will reach out to you shortly.</b>' // HTML body
+        };
+    
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending email:', error);
+                return res.status(500).send('Failed to send email.');
+            }
+            console.log('Email sent:', info.response);
+            res.json({messsage: 'Email sent successfully to ' + email});
+        });
+    });
+
     app.post('/update-offering', upload.any(), async (req, res) => {
-        console.log(req.body)
-        console.log(req.files)
         const encryptedUsername = req.cookies.user;
         if (!encryptedUsername) {
             return res.status(401).send('No credentials provided');
         }
+
+
+        console.log(req.body)
     
         const username = decrypt(encryptedUsername);
-        
     
-        db.get('SELECT id FROM providers WHERE name = ?', [username], async (err, row) => {
+        db.get('SELECT id FROM providers WHERE name = ?', [username], async (err, providerRow) => {
             if (err) return res.status(500).send('Internal server error');
-            if (!row) return res.status(404).send('Provider not found');
+            if (!providerRow) return res.status(404).send('Provider not found');
     
-            const providerId = row.id;
-    
-            // Handle multiple categories
-            const categories = ['coffin', 'flower']; // Extend this list with more categories as needed
-            categories.forEach(category => {
-                const items = req.body[category] || [];
-                const files = req.files.filter(file => file.fieldname.startsWith(category));
-                console.log(files)
-                items.forEach((item, index) => {
-                    const file = files[index]; // Directly use index for matching
-                    if (file) {
-                        const blob = bucket.file(`${category}/${Date.now()}_${file.originalname}`);
-                        const blobStream = blob.createWriteStream({
-                            resumable: false,
-                            metadata: { contentType: file.mimetype }
-                        });
-    
-                        blobStream.on('error', err => console.error(err));
-                        blobStream.on('finish', () => {
-                            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-    
-                            db.run(`INSERT INTO ${category}s (provider_id, name, price, img_path) VALUES (?, ?, ?, ?)`,
-                                [providerId, item.name, item.price, publicUrl], (err) => {
-                                    if (err) console.error(`Error updating ${category}:`, err.message);
-                                });
-                        });
-    
-                        blobStream.end(file.buffer);
-                    } else {
-                        console.error('No matching file found for', item.name);
-                    }
-                });
-                const second_categories = ['church', 'cemetery'];
+            const providerId = providerRow.id;
+            const categories = ['coffin', 'flower'];
+            const second_categories = ['church', 'cemetery'];
+            if (req.query.type === "places") {
                 second_categories.forEach(category => {
-                    const items = req.body[category] || [];
-                    items.forEach((item) => {
-                        const sql = `INSERT INTO ${category} (provider_id, name, description, address) VALUES (?, ?, ?, ?)`;
-                        const params = [providerId, item.name, item.description, item.address];
-                
-                        db.run(sql, params, (err) => {
-                            if (err) {
-                                console.error(`Error updating ${category}:`, err.message);
-                            } else {
-                                console.log(`${category} updated successfully`);
-                            }
+                    db.run(`DELETE FROM ${category} WHERE provider_id = ?`, [providerId], (delErr) => {
+                        if (delErr) {
+                            console.error(`Error clearing ${category}:`, delErr.message);
+                            return;
+                        }
+        
+                        // Insert new data
+                        const items = req.body[category] || [];
+                        items.forEach(item => {
+                            const sql = `INSERT INTO ${category} (provider_id, name, description, address) VALUES (?, ?, ?, ?)`;
+                            db.run(sql, [providerId, item.name, item.description, item.address], (err) => {
+                                if (err) {
+                                    console.error(`Error updating ${category}:`, err.message);
+                                } else {
+                                    console.log(`${category} updated successfully`);
+                                }
+                            });
                         });
                     });
                 });
+            }
+            // Clear existing data for second_categories
+            
+            
+            if (req.query.type === "items") {
 
-            });
+            
+                // Handle coffins and flowers
+                for (let category of categories) {
+
+                    const existingItems = await new Promise(resolve => {
+                        db.all(`SELECT name FROM ${category}s WHERE provider_id = ?`, [providerId], (err, rows) => {
+                            if (err) {
+                                console.error(`Error fetching existing ${category}s:`, err.message);
+                                return resolve([]);
+                            }
+                            resolve(rows.map(row => row.name));
+                        });
+                    });
+
+                    const items = req.body[category] || [];
+                    const files = req.files.filter(file => file.fieldname.startsWith(category));
+
+                    // Create a set of new and updated names
+                    const updatedNames = new Set(items.map(item => item.name));
+
+                    // Delete entries not mentioned in the updated list
+                    const namesToDelete = existingItems.filter(name => !updatedNames.has(name));
+                    for (const name of namesToDelete) {
+                        db.run(`DELETE FROM ${category}s WHERE provider_id = ? AND name = ?`, [providerId, name], (err) => {
+                            if (err) console.error(`Error deleting ${category} ${name}:`, err.message);
+                        });
+                    }
+
+        
+                    for (let i = 0; i < items.length; i++) {
+                        const item = items[i];
+                        const file = files.find(f => f.fieldname === `${category}[${i}][image]`);
+                        const existing = await new Promise(resolve => {
+                            db.get(`SELECT * FROM ${category}s WHERE name = ? AND provider_id = ?`, [item.name, providerId], (err, row) => {
+                                if (err) {
+                                    console.error(`Error fetching ${category}:`, err.message);
+                                    return resolve(null);
+                                }
+                                resolve(row);
+                            });
+                        });
+        
+                        if (existing) {
+                            if (file) {
+                                const publicUrl = await uploadToCloudStorage(file, category);
+                                db.run(`UPDATE ${category}s SET price = ?, img_path = ? WHERE id = ?`,
+                                    [item.price, publicUrl, existing.id], (err) => {
+                                        if (err) console.error(`Error updating ${category}:`, err.message);
+                                    });
+                            } else {
+                                console.log(`${category} not updated as no new image provided for existing item.`);
+                            }
+                        } else {
+                            if (file) {
+                                const publicUrl = await uploadToCloudStorage(file, category);
+                                db.run(`INSERT INTO ${category}s (provider_id, name, price, img_path) VALUES (?, ?, ?, ?)`,
+                                    [providerId, item.name, item.price, publicUrl], (err) => {
+                                        if (err) console.error(`Error creating new ${category}:`, err.message);
+                                    });
+                            } else {
+                                res.send(`After renaming ${item.name}, please upload image again`);
+                            }
+                        }
+                    }
+                }
+            }
     
-            res.json({message: 'Offerings updated successfully'});
+            res.json({message:"Processed update offering request."});
         });
     });
     
+    app.get('/coffins/:providerId', (req, res) => {
+        const { providerId } = req.params;
+    
+        getProviderId(providerId, (err, resolvedProviderId) => {
+            if (err) {
+                console.error('Error resolving providerId:', err.message);
+                res.status(400).json({ error: err.message });
+                return;
+            }
+    
+            const sql = 'SELECT * FROM coffins WHERE provider_id = ?';
+            db.all(sql, [resolvedProviderId], (err, rows) => {
+                if (err) {
+                    console.error('Error fetching coffins:', err.message);
+                    res.status(500).json({ error: 'Internal server error' });
+                    return;
+                }
+    
+                const coffins = rows.map(coffin => ({
+                    id: coffin.id,
+                    name: coffin.name,
+                    description: coffin.description,
+                    price: coffin.price,
+                    imgPath: coffin.img_path
+                }));
+    
+                res.json(coffins);
+            });
+        });
+    });
 
-    app.post('/calendar-upload', (req, res) => {
+    app.get('/flowers/:providerId', (req, res) => {
+        const { providerId } = req.params;
+    
+        getProviderId(providerId, (err, resolvedProviderId) => {
+            if (err) {
+                console.error('Error resolving providerId:', err.message);
+                res.status(400).json({ error: err.message });
+                return;
+            }
+    
+            const sql = 'SELECT * FROM flowers WHERE provider_id = ?';
+            db.all(sql, [resolvedProviderId], (err, rows) => {
+                if (err) {
+                    console.error('Error fetching flowers:', err.message);
+                    res.status(500).json({ error: 'Internal server error' });
+                    return;
+                }
+    
+                const flowers = rows.map(flower => ({
+                    id: flower.id,
+                    name: flower.name,
+                    description: flower.description,
+                    price: flower.price,
+                    imgPath: flower.img_path
+                }));
+    
+                res.json(flowers);
+            });
+        });
+    });
+    
+    app.get('/church/:providerId', (req, res) => {
+        const { providerId } = req.params;
+    
+        getProviderId(providerId, (err, resolvedProviderId) => {
+            if (err) {
+                console.error('Error resolving providerId:', err.message);
+                res.status(400).json({ error: err.message });
+                return;
+            }
+    
+            const sql = 'SELECT * FROM church WHERE provider_id = ?';
+            db.all(sql, [resolvedProviderId], (err, rows) => {
+                if (err) {
+                    console.error('Error fetching churches:', err.message);
+                    res.status(500).json({ error: 'Internal server error' });
+                    return;
+                }
+    
+                const churches = rows.map(church => ({
+                    id: church.id,
+                    name: church.name,
+                    description: church.description,
+                    address: church.address
+                }));
+    
+                res.json(churches);
+            });
+        });
+    });
+    
+    app.get('/cemetery/:providerId', (req, res) => {
+        const { providerId } = req.params;
+    
+        getProviderId(providerId, (err, resolvedProviderId) => {
+            if (err) {
+                console.error('Error resolving providerId:', err.message);
+                res.status(400).json({ error: err.message });
+                return;
+            }
+    
+            const sql = 'SELECT * FROM cemetery WHERE provider_id = ?';
+            db.all(sql, [resolvedProviderId], (err, rows) => {
+                if (err) {
+                    console.error('Error fetching cemeteries:', err.message);
+                    res.status(500).json({ error: 'Internal server error' });
+                    return;
+                }
+    
+                const cemeteries = rows.map(cemetery => ({
+                    id: cemetery.id,
+                    name: cemetery.name,
+                    description: cemetery.description,
+                    address: cemetery.address
+                }));
+    
+                res.json(cemeteries);
+            });
+        });
+    });
+
+    app.post('/calendar-upload/:providerId', (req, res) => {
+        const { providerId } = req.params;
         const events = req.body;
-        console.log(events); // Log the events
     
         events.forEach(event => {
             const { title, start, end, allDay } = event;
-            db.run('INSERT INTO Events (title, start, end, allDay) VALUES (?, ?, ?, ?)', [title, start, end, allDay], (err) => {
+            const sql = 'INSERT INTO Events (provider_id, title, start, end, allDay) VALUES (?, ?, ?, ?, ?)';
+            db.run(sql, [providerId, title, start, end, allDay], (err) => {
                 if (err) {
-                    return console.error(err.message);
+                    console.error(err.message);
+                    return res.status(500).send(err.message);
                 }
                 console.log('A row has been inserted');
             });
@@ -383,17 +669,19 @@ function expressServer() {
     
         res.status(200).json({ message: 'Events saved successfully' });
     });
+    
 
 
-    app.get('/calendar-source', (req, res) => {
-        // Query the database for all events
-        db.all('SELECT title, start, end, allDay FROM Events', [], (err, rows) => {
+    app.get('/calendar-source/:providerId', (req, res) => {
+        const { providerId } = req.params;
+    
+        const sql = 'SELECT title, start, end, allDay FROM Events WHERE provider_id = ?';
+        db.all(sql, [providerId], (err, rows) => {
             if (err) {
                 console.error(err.message);
                 res.status(500).json({ error: err.message });
                 return;
             }
-            // Convert the database rows to FullCalendar event objects
             const events = rows.map(row => ({
                 title: row.title,
                 start: row.start,
@@ -401,26 +689,54 @@ function expressServer() {
                 allDay: row.allDay === 1 // Convert integer back to boolean for FullCalendar
             }));
     
-            // Send the events to the client
             res.json(events);
         });
     });
 
-
-    app.post('/register-home', (req, res) => {
-        const { username, password } = req.body;
+    app.post('/download-database', (req, res) => {
+        const { password } = req.body;
     
-        if (!username || !password) {
-            return res.status(400).json({ message: 'Username and password are required' });
+        if (password !== process.env.MASTER_PASSWORD) {
+            return res.status(401).json({ error: 'Unauthorized: Incorrect password' });
         }
     
-        saveCredentials(username, password, db, (err, result) => {
+        const dbPath = './database.db'
+    
+        // Check if the database file exists
+        if (!fs.existsSync(dbPath)) {
+            return res.status(404).json({ error: 'Database file not found' });
+        }
+    
+        // Send the database file as a download
+        res.download(dbPath, 'database.db', (err) => {
             if (err) {
-                res.status(500).json({ message: 'Failed to register credentials and initialize offerings', error: err.message });
-            } else {
-                res.status(201).json(result);
+                console.error('Error sending the database file:', err);
+                res.status(500).json({ error: 'Failed to send the database file' });
             }
         });
+    });
+    
+
+
+    app.post('/register-home', (req, res) => {
+        const { username, password, providerId, masterPassword } = req.body;
+    
+        if (!username || !password || !masterPassword) {
+            return res.status(400).json({ message: 'Username and password are required' });
+        }
+        if (masterPassword === process.env.MASTER_PASSWORD) {
+            saveCredentials(username, password, providerId, db, (err, result) => {
+                if (err) {
+                    res.status(500).json({ message: 'Failed to register credentials and initialize offerings', error: err.message });
+                } else {
+                    res.status(201).json(result);
+                }
+            });
+        } else {
+            res.status(400).json({message: "Master Password incorrect"})
+        }
+
+        
     });
 
     app.post('/store-data', async (req, res) => {

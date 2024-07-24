@@ -1983,17 +1983,71 @@ document.addEventListener('DOMContentLoaded', function() {
 //     });
 // });
 
+function formatEventsForDisplay(events) {
+    let content = '<div class="events-display row">';
+    if (events.length > 0) {
+        events.forEach(event => {
+            content += `<div class="event col-8 form-centered-col">
+                <h4>${event.title}</h4>
+                <p>Start: ${new Date(event.start).toLocaleString()}</p>
+                <p>End: ${new Date(event.end).toLocaleString()}</p>
+            </div>`;
+        });
+    } else {
+        content += '<p>No available events to display.</p>';
+    }
+    content += '</div>';
+    return content;
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('funeral_form');
-    
+
     form.addEventListener('submit', function(e) {
         e.preventDefault();  // Prevent the default form submission
         console.log("Form submission prevented");
-        
-        // Clone the form to manipulate it without affecting the original on the page
+
+        // Extract "Available" events from the calendar
+        let availableEvents = [];
+        if (window.calendar) {  // Assuming 'calendar' is the variable holding your FullCalendar instance
+            let allEvents = window.calendar.getEvents();
+            availableEvents = allEvents.filter(event => event.title === 'Available').map(event => {
+                return {
+                    title: event.title,
+                    start: event.start.toISOString(),
+                    end: event.end.toISOString(),
+                    allDay: event.allDay
+                };
+            });
+        }
+
+        // Replace the calendar with a formatted display of available events
+        const calendarContainer = document.getElementById('calendar');
+        if (calendarContainer) {
+            calendarContainer.innerHTML = formatEventsForDisplay(availableEvents);
+        }
+
+        // Store the available events in session storage
+        sessionStorage.setItem('available_events', JSON.stringify(availableEvents));
+
+        // Handle other form data...
+        const emailInput = form.querySelector('input[name="email_input"]');
+        if (emailInput) {
+            sessionStorage.setItem('email', emailInput.value);
+        }
+
+        // Clone form, handle checkboxes and radios, and remove buttons
         const formClone = form.cloneNode(true);
-        
-        // Remove all buttons from the clone
+        const checkboxesAndRadios = formClone.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+        checkboxesAndRadios.forEach(input => {
+            if (input.checked) {
+                input.setAttribute('checked', 'checked');
+            } else {
+                input.removeAttribute('checked');
+            }
+        });
+
         const buttons = formClone.querySelectorAll('button, input[type="button"], input[type="submit"], input[type="reset"]');
         buttons.forEach(button => button.remove());
 
@@ -2001,9 +2055,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const formHTML = formClone.outerHTML;
         sessionStorage.setItem('formHTML', formHTML);
 
-        window.location.href = 'payment.html';  // Redirect to the next page where the form will be displayed and disabled
+        // Redirect to the payment page
+        window.location.href = 'payment.html';
     });
 });
+
+
+
 
 
 
@@ -2035,3 +2093,236 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // Funeral home interface 
 
+
+function displayItems(items, type) {
+    const container = document.getElementById(`${type}-selection-container`);
+    container.innerHTML = ''; // Clear existing contents
+
+    items.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `${type}-option`;
+
+        const radioInput = document.createElement('input');
+        radioInput.type = 'radio';
+        radioInput.name = `${type}Selection`;
+        radioInput.value = item.id;
+        radioInput.id = `${type}${index}`;
+
+        const label = document.createElement('label');
+        label.htmlFor = `${type}${index}`;
+        label.style.display = 'block';
+        label.style.cursor = 'pointer';
+
+        const nameAndPrice = document.createElement('span');
+        nameAndPrice.textContent = `${item.name} - $${item.price}`;
+        nameAndPrice.style.marginLeft = '10px';
+
+        const image = document.createElement('img');
+        image.src = item.imgPath;
+        image.alt = item.name;
+        image.style.width = '100px';
+        image.style.marginRight = '10px';
+
+        label.appendChild(image);
+        label.appendChild(nameAndPrice);
+
+        itemDiv.appendChild(radioInput);
+        itemDiv.appendChild(label);
+
+        container.appendChild(itemDiv);
+
+        // Event listener for changing selection
+        radioInput.addEventListener('change', function() {
+            // Clear previously selected
+            document.querySelectorAll(`.${type}-option`).forEach(el => el.classList.remove('selected'));
+            // Apply 'selected' class to the parent item option if this radio is checked
+            if (this.checked) {
+                itemDiv.classList.add('selected');
+            }
+        });
+    });
+}
+
+function fetchItems(providerId, type) {
+    console.log(`/${type}s/${providerId}`);
+    fetch(`/${type}s/${providerId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(items => {
+            displayItems(items, type);
+        })
+        .catch(error => console.error(`Error fetching ${type}s:`, error));
+}
+
+function displayLocations(locations, type) {
+    const containerId = `${type}-selection-container`;
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Clear existing contents
+
+    locations.forEach((location, index) => {
+        const locationDiv = document.createElement('div');
+        locationDiv.className = `${type}-option`;
+
+        const radioInput = document.createElement('input');
+        radioInput.type = 'radio';
+        radioInput.name = `${type}Selection`;
+        radioInput.value = location.id; // Assuming each location has a unique ID
+        radioInput.id = `${type}${index}`;
+
+        const label = document.createElement('label');
+        label.htmlFor = `${type}${index}`;
+        label.style.display = 'block';
+        label.style.cursor = 'pointer';
+
+        const nameAndAddress = document.createElement('span');
+        nameAndAddress.textContent = `${location.name} - ${location.address}`;
+        nameAndAddress.style.marginLeft = '10px';
+
+        label.appendChild(nameAndAddress);
+
+        locationDiv.appendChild(radioInput);
+        locationDiv.appendChild(label);
+
+        container.appendChild(locationDiv);
+    });
+}
+
+function fetchLocations(providerId, type) {
+    const url = `/${type}/${providerId}`;
+    console.log(url);
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Network response was not ok for ${type}`);
+            }
+            return response.json();
+        })
+        .then(locations => {
+            displayLocations(locations, type);
+        })
+        .catch(error => console.error(`Error fetching ${type}:`, error));
+}
+
+
+function initializeCalendar(providerId) {
+    console.log('Initializing calendar with providerId:', providerId);
+    var calendarEl = document.getElementById('calendar');
+    if (!calendarEl) {
+        console.error('Calendar element not found!');
+        return;
+    }
+    console.log('Calendar element found:', calendarEl);
+
+    window.calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',  // Shows the weekly view
+        selectable: true,  // Allow users to select time ranges
+        selectMirror: true,
+        select: function(arg) {
+            console.log(`Selected from ${arg.startStr} to ${arg.endStr}`);
+
+            let overlaps = window.calendar.getEvents().some(event => event.title === 'Unavailable' && (arg.start < event.end && arg.end > event.start));
+
+            if (overlaps) {
+                console.log('Overlap detected with an Unavailable event.');
+                alert('Your event overlaps with an Unavailable time. Adjusting times.');
+                const unavailableEvent = window.calendar.getEvents().find(event => event.title === 'Unavailable' && (arg.start < event.end && arg.end > event.start));
+                if (unavailableEvent) {
+                    if (arg.start >= unavailableEvent.start && arg.start < unavailableEvent.end) {
+                        arg.start = unavailableEvent.end;
+                    }
+                    if (arg.end > unavailableEvent.start && arg.end <= unavailableEvent.end) {
+                        arg.end = unavailableEvent.start;
+                    }
+                }
+            }
+
+            window.calendar.addEvent({
+                title: 'Available',
+                start: arg.start,
+                end: arg.end,
+                allDay: arg.allDay,
+                backgroundColor: '#78a9ff',
+                editable: true, // User-created events are editable
+                extendedProps: {
+                    createdByUser: true
+                }
+            });
+
+            window.calendar.unselect();
+        },
+        eventClick: function(info) {
+            if (info.event.title !== 'Unavailable' && info.event.extendedProps.createdByUser) {
+                if (confirm('Do you want to delete this event?')) {
+                    info.event.remove();
+                    console.log('Event deleted:', info.event.id);
+                }
+            } else {
+                alert('You cannot delete or modify this event.');
+            }
+        },
+        editable: true,  // Initially allow drag and drop
+        eventAllow: function(dropInfo, draggedEvent) {
+            // Prevent dragging or resizing for 'Unavailable' events or non-user-created events
+            return draggedEvent.title !== 'Unavailable' && draggedEvent.extendedProps.createdByUser;
+        },
+        eventSources: [
+            `/calendar-source/${providerId}`
+        ]
+    });
+
+    window.calendar.render();
+}
+
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+
+	var Carousel = document.getElementById('carouselExampleControls');
+	var activeSlide = Carousel.querySelector('.carousel-item.active');
+		var providerId = activeSlide.getAttribute('data-provider-id');
+
+		console.log('Active Provider ID:', providerId); // This will show the fetched provider ID
+
+		if (providerId) {
+			fetchItems(providerId, "coffin");
+			fetchItems(providerId, "flower");
+			fetchLocations(providerId, "church");
+			fetchLocations(providerId, "cemetery");
+			initializeCalendar(providerId);
+		} else {
+			console.error('Provider ID is undefined or not set.');
+		}
+		Carousel.addEventListener('slid.bs.carousel', function() {
+	var activeSlide = Carousel.querySelector('.carousel-item.active');
+	var providerId = activeSlide.getAttribute('data-provider-id');
+
+	console.log('Active Provider ID:', providerId); // This will show the fetched provider ID
+
+	if (providerId) {
+		fetchItems(providerId, "coffin");
+		fetchItems(providerId, "flower");
+		fetchLocations(providerId, "church");
+		fetchLocations(providerId, "cemetery");
+		initializeCalendar(providerId);
+	} else {
+		console.error('Provider ID is undefined or not set.');
+	}
+});
+});
+
+
+
+
+
+
+
+	

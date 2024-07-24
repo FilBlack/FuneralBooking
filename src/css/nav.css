@@ -319,5 +319,109 @@ h1 {
 }
 
 #our-partners {
-    background-color: #f7ffcd;
+    background-color: #ffffff;
+    box-shadow: 0px 4px 11px 0px rgba(0, 0, 0, 0.25);
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-image: url("../images/right-arrow-svgrepo-com.svg");
+}
+
+.carousel-control-prev-icon {
+  transform: scale(-1);
+}
+
+ /* .coffin-option{
+    
+    border-radius: 5px;
+    box-shadow: 3px 2px 20px rgba(135, 255, 253, 0.05);
+
+    width: 200px;
+} */
+
+/* .coffin-option label {
+    display: grid;
+    grid-template-columns: 1fr; 
+}  */
+
+/* Style the container to lay out the coffin options as cards */
+#coffin-selection-container, #flower-selection-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjust column size as needed */
+    gap: 20px; /* Space between cards */
+    padding: 20px; /* Padding around the grid */
+}
+
+/* Style each coffin option card */
+.coffin-option, .flower-option {
+    background-color: #fff; /* White background for the card */
+    border: 1px solid #ccc; /* Light gray border */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+    border-radius: 8px; /* Rounded corners */
+    overflow: hidden; /* Keeps child elements within the card */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    box-sizing: border-box; /* Include padding and border in the element's dimensions */
+}
+
+.coffin-option label, .flower-option label {
+    display: block;
+    text-align: center;
+    cursor: pointer;
+    flex-grow: 1;
+    width: 100%; /* Ensure label takes full width of the card */
+}
+
+.coffin-option img, .flower-option img {
+    width: 80%; /* Adjust image size within the card */
+    margin-top: 10px; /* Space above the image */
+}
+
+.coffin-option span, .flower-option span {
+    display: block;
+    margin-top: 10px; /* Space between image and text */
+    font-size: 16px; /* Larger text for visibility */
+    color: #333; /* Darker text for better readability */
+}
+
+input[type="radio"] {
+    margin-top: 10px; /* Space below the label */
+}
+
+
+.size-20 {
+    font-size: 20px;
+}
+
+/* Hide the radio button visually but keep it functional */
+.flower-option input[type="radio"], .coffin-option input[type="radio"] {
+    appearance: none;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Hover effect for the label */
+.coffin-option label, .flower-option label {
+    display: block;
+    text-align: center;
+    cursor: pointer;
+    flex-grow: 1;
+    width: 100%; /* Ensure label takes full width of the card */
+    position: relative; /* Needed for positioning the pseudo-element */
+}
+
+/* Adjustments for hover effects and focus for accessibility */
+/* .coffin-option label:hover, .flower-option label:hover,
+input[type="radio"]:focus + label {
+    outline: 1px dashed #666; /* Show dashed outline on hover/focus */
+/* } */
+
+.coffin-option.selected, .flower-option.selected {
+    border: 2px solid rgb(29, 206, 20); /* Blue outline for the selected card */
 }

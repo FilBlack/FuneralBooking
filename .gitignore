@@ -12,4 +12,5 @@ misc.txt
 
 database.json 
 
-funerals-website-b62cb73e38d5.json
+config/
+config/credentials.json

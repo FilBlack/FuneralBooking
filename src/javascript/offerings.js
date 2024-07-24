@@ -160,43 +160,161 @@ document.addEventListener("DOMContentLoaded", function() {
 /////////////////////////////////////////////////////////////////////////////
 
 document.addEventListener('DOMContentLoaded', () => {
-    const createPictureInputGroup = (inputContainer, type) => {  // Add a 'type' parameter to specify flower or coffin
+
+    function getCookies() {
+        const cookies = document.cookie.split('; ');
+        const cookieObj = {};
+        cookies.forEach(cookie => {
+            const [name, value] = cookie.split('=');
+            cookieObj[decodeURIComponent(name)] = decodeURIComponent(value);
+        });
+        return cookieObj;
+    }
+    
+    // Function to get a specific cookie by name
+    function getCookie(name) {
+        const cookieObj = getCookies();
+        return cookieObj[name]; // Directly return the value of the specified cookie
+    }
+
+    const createPictureInputGroup = (inputContainer, type) => {
         const newInputGroup = document.createElement('div');
         newInputGroup.classList.add(type + '-input-group');
-
+    
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.name = 'name[]'; 
         nameInput.placeholder = 'Enter name';
         nameInput.required = true;
-
+    
         const priceInput = document.createElement('input');
         priceInput.type = 'number';
-        priceInput.name = 'price[]'; // Use 'flower_price[]' or 'coffin_price[]' for prices
+        priceInput.name = 'price[]';
         priceInput.placeholder = 'Enter price';
         priceInput.required = true;
-
+    
+        // File upload label/button
+        const fileLabel = document.createElement('label');
+        fileLabel.textContent = 'Upload Image';
+        fileLabel.classList.add('custom-file-upload');
+    
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
-        fileInput.name = 'image[]'; // Use 'flower_images' or 'coffin_images' for file names
+        fileInput.name = 'image[]';
         fileInput.accept = 'image/*';
         fileInput.required = true;
-
+        fileInput.style.display = 'none';
+    
+        // Image display area
+        const imageDisplay = document.createElement('img');
+        imageDisplay.style.width = '200px'; // Adjust as needed
+        imageDisplay.style.display = 'none'; // Initially hide the image display
+        imageDisplay.style.objectFit = 'cover';
+        imageDisplay.style.height = '100%';
+    
+        fileLabel.appendChild(fileInput);
+        
+    
+        // Event listener for file input to update the image display
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    imageDisplay.src = e.target.result;
+                    imageDisplay.style.display = 'block'; // Show the image
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
         removeButton.classList.add('remove-button');
         removeButton.textContent = '-';
-
+    
         removeButton.addEventListener('click', () => {
             inputContainer.removeChild(newInputGroup);
         });
-
+    
         newInputGroup.appendChild(nameInput);
         newInputGroup.appendChild(priceInput);
-        newInputGroup.appendChild(fileInput);
+        newInputGroup.appendChild(fileLabel);
         newInputGroup.appendChild(removeButton);
+        newInputGroup.appendChild(imageDisplay);
         inputContainer.appendChild(newInputGroup);
     };
+    
+
+    const createPictureInputGroupCustom = (inputContainer, type, name = '', price = '', img_path = '') => {
+        const newInputGroup = document.createElement('div');
+        newInputGroup.classList.add(type + '-input-group');
+    
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.name = 'name[]';
+        nameInput.placeholder = 'Enter name';
+        nameInput.value = name;
+        nameInput.required = true;
+    
+        const priceInput = document.createElement('input');
+        priceInput.type = 'number';
+        priceInput.name = 'price[]';
+        priceInput.placeholder = 'Enter price';
+        priceInput.value = price;
+        priceInput.required = true;
+    
+        // File upload label/button
+        const fileLabel = document.createElement('label');
+        fileLabel.textContent = 'Upload Image';
+        fileLabel.classList.add('custom-file-upload');
+    
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.name = 'image[]';
+        fileInput.accept = 'image/*';
+        fileInput.required = false;
+        fileInput.style.display = 'none';  // Hide the actual file input
+    
+        // Image display area
+        const imageDisplay = document.createElement('img');
+        imageDisplay.style.width = '100px';  // Adjust as needed
+        if (img_path) {
+            imageDisplay.src = img_path;
+            imageDisplay.alt = 'Uploaded Image';
+        }
+    
+        fileLabel.appendChild(fileInput);
+        
+    
+        // Event listener for file input to update the image display
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    imageDisplay.src = e.target.result;
+                    imageDisplay.alt = 'Newly Uploaded Image';
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.classList.add('remove-button');
+        removeButton.textContent = '-';
+    
+        removeButton.addEventListener('click', () => {
+            inputContainer.removeChild(newInputGroup);
+        });
+    
+        newInputGroup.appendChild(nameInput);
+        newInputGroup.appendChild(priceInput);
+        newInputGroup.appendChild(fileLabel);
+        newInputGroup.appendChild(removeButton);
+        newInputGroup.appendChild(imageDisplay);
+        inputContainer.appendChild(newInputGroup);
+    };
+    
     
 
 
@@ -231,6 +349,40 @@ document.addEventListener('DOMContentLoaded', () => {
         inputContainer.appendChild(newInputGroup);
     };
 
+    const createAddressInputGroupCustom = (inputContainer, type, initialName = '', initialAddress = '') => {
+        const newInputGroup = document.createElement('div');
+        newInputGroup.classList.add(type + '-input-group');
+    
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.name = 'name[]';
+        nameInput.placeholder = 'Enter name';
+        nameInput.value = initialName;  // Set default or initial name if provided
+        nameInput.required = true;
+    
+        const addressInput = document.createElement('input');
+        addressInput.type = 'text';
+        addressInput.name = 'address[]';
+        addressInput.placeholder = 'Enter address';
+        addressInput.value = initialAddress;  // Set default or initial address if provided
+        addressInput.required = true;
+    
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.classList.add('remove-button');
+        removeButton.textContent = '-';
+    
+        removeButton.addEventListener('click', () => {
+            inputContainer.removeChild(newInputGroup);
+        });
+    
+        newInputGroup.appendChild(nameInput);
+        newInputGroup.appendChild(addressInput);
+        newInputGroup.appendChild(removeButton);
+        inputContainer.appendChild(newInputGroup);
+    };
+    
+
 
     const coffinInputContainer = document.getElementById('coffin-input-container');
     const coffinAddButton = document.getElementById('coffin-add-button');
@@ -247,8 +399,6 @@ document.addEventListener('DOMContentLoaded', () => {
         createPictureInputGroup(coffinInputContainer, 'coffin');
     });
 
-    // Initially add the first input group
-    createPictureInputGroup(coffinInputContainer, 'coffin');
     
 
     // Event listener for the add button
@@ -257,8 +407,78 @@ document.addEventListener('DOMContentLoaded', () => {
         createPictureInputGroup(flowerInputContainer,'flower');
     });
 
-    // Initially add the first input group
-    createPictureInputGroup(flowerInputContainer,'flower');
+    // GETTING THE PROVIDERID through cookie!
+    const providerId = getCookie('providerId')
+    //////////////////////////////////////////////
+        
+    if (providerId) {
+        fetch(`/flowers/${providerId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(flowers => {
+                // Assuming 'flowers' is an array of flower objects
+                const flowerInputContainer = document.getElementById('flower-input-container');
+                flowers.forEach((flower, index) => {
+                    createPictureInputGroupCustom(flowerInputContainer, 'flower', flower.name, flower.price, flower.imgPath);
+                });
+            })
+            .catch(error => console.error('Error fetching flowers:', error));
+
+        fetch(`/coffins/${providerId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(coffins => {
+                // Assuming 'flowers' is an array of coffin objects
+                const coffinInputContainer = document.getElementById('coffin-input-container');
+                coffins.forEach((coffin, index) => {
+                    createPictureInputGroupCustom(coffinInputContainer, 'coffin', coffin.name, coffin.price, coffin.imgPath);
+                });
+            })
+            .catch(error => console.error('Error fetching coffins:', error));
+        
+        fetch(`/church/${providerId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(churches => {
+                // Assuming 'flowers' is an array of church objects
+                const churchInputContainer = document.getElementById('church-input-container');
+                churches.forEach((church, index) => {
+                    createAddressInputGroupCustom(churchInputContainer, 'church', church.name, church.address);
+                });
+            })
+            .catch(error => console.error('Error fetching churchs:', error));
+        
+        fetch(`/cemetery/${providerId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(cemeteries => {
+                // Assuming 'flowers' is an array of cemetery objects
+                const cemeteryInputContainer = document.getElementById('cemetery-input-container');
+                cemeteries.forEach((cemetery, index) => {
+                    createAddressInputGroupCustom(cemeteryInputContainer, 'cemetery', cemetery.name, cemetery.address);
+                });
+            })
+            .catch(error => console.error('Error fetching cemeterys:', error));
+    } else {
+        console.error('Provider ID not found in cookies.');
+    }
+
 
 
     const offeringForm = document.getElementById('offering-form');
@@ -269,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
 
         // Dynamically add entries for coffins
-        const coffinInputs = document.querySelectorAll('.coffin-input-group'); // Make sure your inputs are within divs with this class
+        const coffinInputs = document.querySelectorAll('.coffin-input-group');
         coffinInputs.forEach((input, index) => {
             const nameInput = input.querySelector('[name="name[]"]');
             const priceInput = input.querySelector('[name="price[]"]');
@@ -278,12 +498,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Append coffin data to formData
             formData.append(`coffin[${index}][name]`, nameInput.value);
             formData.append(`coffin[${index}][price]`, priceInput.value);
-            if (fileInput.files[0]) {
+            if (fileInput.files.length > 0) {
                 formData.append(`coffin[${index}][image]`, fileInput.files[0]);
+            } else {
+                formData.append(`coffin[${index}][image]`, ''); // Append a blank string if no file is uploaded
             }
         });
 
-        const flowerInputs = document.querySelectorAll('.flower-input-group'); // Make sure your inputs are within divs with this class
+        const flowerInputs = document.querySelectorAll('.flower-input-group');
         flowerInputs.forEach((input, index) => {
             const nameInput = input.querySelector('[name="name[]"]');
             const priceInput = input.querySelector('[name="price[]"]');
@@ -292,14 +514,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Append flower data to formData
             formData.append(`flower[${index}][name]`, nameInput.value);
             formData.append(`flower[${index}][price]`, priceInput.value);
-            if (fileInput.files[0]) {
+            if (fileInput.files.length > 0) {
                 formData.append(`flower[${index}][image]`, fileInput.files[0]);
+            } else {
+                formData.append(`flower[${index}][image]`, ''); // Append a blank string if no file is uploaded
             }
         });
         // Repeat the pattern above for flowers or any other categories
 
 
-        fetch('/update-offering', {
+        fetch('/update-offering?type=items', {
             method: 'POST',
             body: formData,
             credentials: 'include' // Include cookies in the request if needed for authentication
@@ -327,11 +551,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listener for the add button
     cemeteryAddButton.addEventListener('click', (e) => {
         e.preventDefault();
-        createAddressInputGroup(cemeteryInputContainer);
+        createAddressInputGroup(cemeteryInputContainer, 'cemetery');
     });
-
-    // Initially add the first input group
-    createAddressInputGroup(cemeteryInputContainer);
 
 
     const churchInputContainer = document.getElementById('church-input-container');
@@ -343,8 +564,6 @@ document.addEventListener('DOMContentLoaded', () => {
         createAddressInputGroup(churchInputContainer,'church');
     });
 
-    // Initially add the first input group
-    createAddressInputGroup(churchInputContainer, 'church');
 
 
     const placesForm = document.getElementById('places-form');
@@ -377,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Repeat the pattern above for flowers or any other categories
 
         
-        fetch('/update-offering', {
+        fetch('/update-offering?type=places', {
             method: 'POST',
             body: formData,
             credentials: 'include' // Include cookies in the request if needed for authentication
@@ -523,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         editable: true,  // Allow drag and drop
         eventSources: [
-            '/calendar-source'  // Load existing events
+            `/calendar-source/${providerId}`  // Load existing events
         ]
     });
 
@@ -549,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(eventData); // For demonstration, log the data to the console
 
         // Optionally, send this data to the server
-        fetch('/calendar-upload', {
+        fetch(`/calendar-upload/${providerId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
