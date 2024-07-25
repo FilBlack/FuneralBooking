@@ -14,3 +14,11 @@ database.json
 
 config/
 config/credentials.json
+
+neverAgain/
+
+docker-compose.yml
+
+eb-env/
+
+volume/

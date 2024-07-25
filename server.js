@@ -14,13 +14,24 @@ const filepath = 'database.json'
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 const nodemailer = require('nodemailer');
+
+const DynamoDBStore = require('connect-dynamodb')({ session: session });
+const AWS = require('aws-sdk');
+
+AWS.config.update({
+    region: 'eu-west-1', // e.g., 'us-west-2'
+    endpoint: process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : undefined, // Localstack endpoint
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
+
 // const forceHttps = require('express-force-https');
 require('dotenv').config();
 // Initialize Stripe with your secret key from the environment variables
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Ensure the .env file is required at the top if you're using environment variables
-const FileStore = require('session-file-store')(session);
 
 const storage = new Storage();
 const bucketName = 'funeral_booking';
@@ -250,13 +261,22 @@ function expressServer() {
     app.use(bodyParser.json());  // Parse JSON request bodies
     app.use(cookieParser());
     app.use(session({
-        store: new FileStore({
-            path: './sessions' // specify the path where session files will be stored
+        store: new DynamoDBStore({
+            table: 'FuneralSession', // Replace with your DynamoDB table name
+            AWSRegion: 'eu-west-1', // e.g., 'us-west-2'
+            endpoint: process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : undefined, // Localstack endpoint
+            logger: console,
+            hashKey: 'funeral' 
         }),
-        secret: process.env.SECRET_PHRASE, // Change this to a real secret in production
+        secret: process.env.SECRET_PHRASE || 'your_secret_key', // Change this to a real secret in production
         resave: false,
-        saveUninitialized: true
+        saveUninitialized: true,
+        cookie: {
+            secure: process.env.NODE_ENV === 'production', // Set to true if using https
+            maxAge: 1000 * 60 * 10 // Session max age in milliseconds
+        }
     }));
+
 
     // Explicitly handle the root route first
     app.get('/', function(req, res) {
