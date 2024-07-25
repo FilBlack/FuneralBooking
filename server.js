@@ -20,7 +20,7 @@ const AWS = require('aws-sdk');
 
 AWS.config.update({
     region: 'eu-west-1', // e.g., 'us-west-2'
-    endpoint: process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : undefined, // Localstack endpoint
+    endpoint: undefined, // Localstack endpoint
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 });
@@ -262,9 +262,9 @@ function expressServer() {
     app.use(cookieParser());
     app.use(session({
         store: new DynamoDBStore({
-            table: 'FuneralSession', // Replace with your DynamoDB table name
-            AWSRegion: 'eu-west-1', // e.g., 'us-west-2'
-            endpoint: process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : undefined, // Localstack endpoint
+            table: 'FuneralSession', 
+            AWSRegion: 'eu-west-1',
+            endpoint:  undefined, // Localstack endpoint
             logger: console,
             hashKey: 'funeral' 
         }),
